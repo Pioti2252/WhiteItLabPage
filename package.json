@@ -7,7 +7,8 @@
     "start": "node server/server.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node --test \"test/*.test.mjs\"",
-    "images": "node scripts/images.mjs"
+    "images": "node scripts/images.mjs",
+    "package": "git archive --format=tar.gz -o whiteitlab.tar.gz HEAD"
   },
   "author": "whiteitlab",
   "license": "MIT",

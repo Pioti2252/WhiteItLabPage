@@ -31,6 +31,7 @@ Status: `Przyjęta` · `Zastąpiona` · `Do potwierdzenia` (wymaga decyzji wła�
 | [022](#adr-022) | Kompresja brotli/gzip w aplikacji, bez inline CSS | Przyjęta |
 | [023](#adr-023) | Hashowane nazwy fontów, hero bez czekania na fonty | Przyjęta |
 | [024](#adr-024) | Bez danych osobowych właściciela i bez analityki (na razie) | Do potwierdzenia |
+| [025](#adr-025) | Wdrożenie: ręcznie skryptami teraz, CI/CD (GitHub Actions + GHCR) później | Przyjęta (wybór właściciela) |
 
 ---
 
@@ -227,3 +228,17 @@ Właściciel poprosił o wymyślenie realistycznego przykładu. Case study „Z 
 **Kontekst.** Imię i nazwisko właściciela (np. `Person` w JSON-LD, sekcja „o mnie”) wzmocniłoby sygnały E-E-A-T. Analityka pozwoliłaby mierzyć ruch.
 **Decyzja.** Na razie żadne z nich: publikacja danych osobowych to decyzja właściciela, a analityka wymaga zmiany CSP i przemyślenia RODO. Na start wystarcza Google Search Console (bez kodu na stronie).
 **Jeśli tak.** Dane osobowe: sekcja „o mnie” + węzeł `Person` (`founder` w `ProfessionalService`, `sameAs`: LinkedIn/GitHub). Analityka: samodzielnie hostowane Umami lub Plausible bez ciasteczek, wpis w `connect-src`/`script-src`, nowy ADR.
+
+## ADR-025
+**Wdrożenie: ręcznie skryptami teraz, CI/CD później** · *Przyjęta (wybór właściciela, 2026-09-26)*
+
+**Kontekst.** VPS już obsługuje inne kontenery i ma nginx na hoście (`/etc/nginx`). Właściciel chce najpierw wdrożyć ręcznie, a automatyzację dodać później. Kod w `/opt/whiteitlab`.
+**Decyzja (etap 1).**
+- Kod przez `git clone` publicznego repo (alternatywnie paczka `npm run package` + `scripts/install-release.sh`).
+- Obraz budowany na VPS przez `scripts/deploy.sh`: zapisuje działający obraz jako `:prev`, buduje z `--pull`, czeka na health check, przy porażce sam wraca do `:prev`. Ciało skryptu w funkcji `main`, bo `git pull` podmienia plik w trakcie działania.
+- Port hosta konfigurowalny (`WEB_PORT`), bo 8080 bywa zajęty przez inne kontenery.
+- `scripts/nginx-install.sh` wykrywa układ (`sites-enabled`/`conf.d`), robi kopię, wpisuje port, usuwa `listen [::]` gdy host nie ma IPv6, i **przywraca poprzedni stan, jeśli `nginx -t` nie przejdzie** — błąd w naszym pliku nie może położyć innych stron na serwerze. Nie rusza `default` ani cudzych plików (poprzednia wersja instrukcji kazała usunąć `sites-enabled/default` — na współdzielonym serwerze to było niebezpieczne).
+- `scripts/vps-preflight.sh` (tylko odczyt) wykrywa konflikty przed zmianą czegokolwiek.
+
+**Plan (etap 2).** GitHub Actions: test → skan (npm audit, Trivy) → build → push do GHCR (`:<sha>`) → SSH na VPS jako użytkownik `deploy` (tylko klucz, ograniczony w `authorized_keys`) → `docker compose pull && up -d` → health check → rollback. Build przenosi się z VPS do CI, więc na produkcję trafia dokładnie ten obraz, który przeszedł testy i skan.
+**Odrzucone.** *Watchtower / automatyczne aktualizacje obrazów*: brak kontroli i health-check-rollbacku. *Budowanie na VPS także w etapie 2*: obciąża serwer z innymi usługami, obraz nie jest tym samym artefaktem, który przetestowano.

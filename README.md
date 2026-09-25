@@ -29,14 +29,20 @@ npm run images     # po zmianie nagłówka/kolorów/domeny: odtwarza obrazki OG 
 
 ## Produkcja (VPS)
 
+Na VPS z nginx na hoście i innymi kontenerami — skrót (pełna instrukcja krok po kroku: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**):
+
 ```bash
-cp .env.example .env && chmod 600 .env          # uzupełnij SMTP / adresy
+git clone https://github.com/Pioti2252/WhiteItLabPage.git /opt/whiteitlab && cd /opt/whiteitlab
+cp .env.example .env && chmod 600 .env && nano .env        # SMTP, adresy, WEB_PORT
 mkdir -p secrets && read -rsp 'Hasło SMTP: ' P && printf %s "$P" > secrets/smtp_pass && unset P
 sudo chown 65532:65532 secrets/smtp_pass && sudo chmod 400 secrets/smtp_pass
-docker compose up -d --build
+sudo bash scripts/vps-preflight.sh          # tylko sprawdza: port, nginx, DNS, uprawnienia
+bash scripts/deploy.sh                      # build + start + health check (+ automatyczny rollback)
+sudo bash scripts/nginx-install.sh bootstrap && sudo certbot certonly --webroot -w /var/www/certbot -d whiteitlab.pl -d www.whiteitlab.pl
+sudo bash scripts/nginx-install.sh final    # HTTPS; przy błędzie nginx -t przywraca poprzedni stan
 ```
 
-Pełna procedura (nginx, certyfikat, firewall, aktualizacje, rollback): **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
+Aktualizacja: `cd /opt/whiteitlab && bash scripts/deploy.sh`. CI/CD (GitHub Actions) — planowane, [DEPLOYMENT.md → Etap 2](docs/DEPLOYMENT.md#etap-2-cicd-później).
 
 ## Struktura
 
@@ -57,6 +63,7 @@ Pełna procedura (nginx, certyfikat, firewall, aktualizacje, rollback): **[docs/
 ├── server/                    # serwer HTTP + API formularza
 ├── scripts/dev.mjs            # uruchomienie lokalne
 ├── scripts/images.mjs         # generator obrazków OG i ikon
+├── scripts/*.sh               # wdrożenie na VPS: preflight, deploy, nginx-install, install-release
 ├── test/                      # node --test
 └── docs/                      # dokumentacja i decyzje
 ```
