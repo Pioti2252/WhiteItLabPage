@@ -9,7 +9,7 @@
     "test": "node --test \"test/*.test.mjs\""
   },
   "author": "whiteitlab",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "nodemailer": "^7.0.13"
