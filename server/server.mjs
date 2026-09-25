@@ -173,6 +173,12 @@ function readBody(req, limit) {
 }
 
 async function handleContact(req, res) {
+  // CONTACT_ENABLED=0: the form is switched off — refuse instead of silently
+  // accepting (bots post to the API directly, whatever the page shows).
+  if (!cfg.contactEnabled) {
+    return json(res, 503, { ok: false, error: 'contact_disabled' }, { 'Retry-After': '86400' });
+  }
+
   const ctype = (req.headers['content-type'] || '').split(';')[0].trim();
   const isJson = ctype === 'application/json';
   const isForm = ctype === 'application/x-www-form-urlencoded';

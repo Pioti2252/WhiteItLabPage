@@ -239,7 +239,8 @@
       "errValidation": "Please check the highlighted fields.",
       "errRate": "Too many attempts in a short time. Please try again in a few minutes.",
       "errServer": "Something went wrong on my side. Please try again later or reach me via GitHub.",
-      "honeypot": "Leave this field empty"
+      "honeypot": "Leave this field empty",
+      "disabled": "The contact form is temporarily disabled — it will be back soon. In the meantime, have a look at my GitHub."
     }
   },
   "footer": {

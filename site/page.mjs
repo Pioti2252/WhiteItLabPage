@@ -196,6 +196,9 @@ function structuredData(t, cfg) {
 
 function home({ t, alt, cfg, assets }) {
   const f = t.contact.form;
+  // site/config.json -> contactFormEnabled: false renders the form locked
+  // (a disabled <fieldset> disables every control, even without JS).
+  const formOff = cfg.contactFormEnabled === false;
   const opt = (obj) => Object.entries(obj).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('');
 
   const services = t.services.items.map((s, i) => `
@@ -342,9 +345,11 @@ function home({ t, alt, cfg, assets }) {
       </a>
     </div>
 
-    <form class="form" action="/api/contact" method="post" novalidate data-form data-reveal
+    <form class="form" action="/api/contact" method="post" novalidate data-form data-reveal${formOff ? ' data-disabled' : ''}
       data-msg-sending="${esc(f.sending)}" data-msg-ok="${esc(f.ok)}"
       data-msg-validation="${esc(f.errValidation)}" data-msg-rate="${esc(f.errRate)}" data-msg-server="${esc(f.errServer)}">
+      ${formOff ? `<p class="form-off" role="note"><span class="mono">OFFLINE</span> ${esc(f.disabled)} <a href="${cfg.github}" rel="me noopener" target="_blank">github.com/${esc(cfg.githubHandle)}</a></p>` : ''}
+      <fieldset class="form-fields"${formOff ? ' disabled' : ''}>
       <input type="hidden" name="lang" value="${t.lang}">
       <input type="hidden" name="ts" value="" data-ts>
       <div class="field hp" aria-hidden="true">
@@ -391,6 +396,7 @@ function home({ t, alt, cfg, assets }) {
         <button class="btn btn-solid" type="submit" data-submit>${esc(f.submit)} ${icon.arrow}</button>
         <p class="form-status" role="status" aria-live="polite" data-status></p>
       </div>
+      </fieldset>
     </form>
   </div>
 </section>`;

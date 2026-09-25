@@ -92,7 +92,7 @@ test('meta: one h1, canonical, hreflang, OG image, description length', async ()
   assert.match(html, /<link rel="canonical" href="https:\/\/whiteitlab\.com\/">/);
   assert.match(html, /hreflang="en" href="https:\/\/whiteitlab\.com\/en\/"/);
   assert.match(html, /hreflang="x-default"/);
-  assert.match(html, /property="og:image" content="https:\/\/whiteitlab\.com\/og\/og-com\.png"/);
+  assert.match(html, /property="og:image" content="https:\/\/whiteitlab\.com\/og\/og-pl\.png"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   const desc = html.match(/<meta name="description" content="([^"]+)"/)[1];
   assert.ok(desc.length >= 70 && desc.length <= 160, `description length ${desc.length}`);
@@ -134,4 +134,32 @@ test('hashed fonts are cached immutably', async () => {
   const r = await fetch(base + font);
   assert.equal(r.status, 200);
   assert.match(r.headers.get('cache-control'), /immutable/);
+});
+
+test('CONTACT_ENABLED=0 refuses submissions with 503', async () => {
+  const port = await freePort();
+  const p = spawn(process.execPath, [fileURLToPath(new URL('../server/server.mjs', import.meta.url))], {
+    env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', MAIL_DRY_RUN: '1', CONTACT_ENABLED: '0', ALLOWED_ORIGINS: `http://127.0.0.1:${port}` },
+    stdio: ['ignore', 'pipe', 'inherit'],
+  });
+  try {
+    await new Promise((res) => p.stdout.on('data', (d) => String(d).includes('listening') && res()));
+    const r = await fetch(`http://127.0.0.1:${port}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    assert.equal(r.status, 503);
+    assert.equal((await r.json()).error, 'contact_disabled');
+  } finally {
+    p.kill('SIGTERM');
+  }
+});
+
+test('disabled form: fieldset disabled + notice when contactFormEnabled is false', async () => {
+  const html = await page('/');
+  const cfg = JSON.parse(await (await import('node:fs/promises')).readFile(new URL('../site/config.json', import.meta.url), 'utf8'));
+  if (cfg.contactFormEnabled === false) {
+    assert.match(html, /<form [^>]*data-disabled/);
+    assert.match(html, /<fieldset class="form-fields" disabled>/);
+    assert.match(html, /class="form-off"/);
+  } else {
+    assert.doesNotMatch(html, /<fieldset class="form-fields" disabled>/);
+  }
 });

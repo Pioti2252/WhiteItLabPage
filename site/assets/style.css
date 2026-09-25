@@ -453,6 +453,15 @@ h2 { font-size: clamp(2.2rem, 5.2vw, 4.4rem); line-height: 1; font-weight: 720; 
 .form-status[data-state="error"] { color: var(--acc-text); }
 .form[data-done] .field, .form[data-done] .field-row, .form[data-done] .consent, .form[data-done] .privacy, .form[data-done] [data-submit] { opacity: .35; pointer-events: none; transition: opacity .6s; }
 
+/* form switched off (site/config.json -> contactFormEnabled: false) */
+.form-fields { display: contents; border: 0; margin: 0; padding: 0; min-width: 0; }
+.form-off { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 16px 18px; border: 1px dashed var(--line-strong); background: var(--surface); font-size: .95rem; }
+.form-off .mono { color: var(--acc-text); font-weight: 700; letter-spacing: .08em; }
+.form-off a { color: var(--acc-text); }
+.form[data-disabled] .field, .form[data-disabled] .consent, .form[data-disabled] .privacy, .form[data-disabled] .form-foot { opacity: .45; }
+.form[data-disabled] :disabled, .form[data-disabled] .topic, .form[data-disabled] .consent { cursor: not-allowed; }
+.form[data-disabled] .btn::before { display: none; }
+
 /* status pages */
 .status-page { min-height: 70vh; display: grid; align-items: center; padding-block: 120px; }
 .status-page .wrap { display: grid; gap: 22px; justify-items: start; }

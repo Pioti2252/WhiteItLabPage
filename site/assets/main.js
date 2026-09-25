@@ -139,7 +139,7 @@
 
   /* ------------------------------------------------------------ form --- */
   const form = $('[data-form]');
-  if (!form) return;
+  if (!form || form.hasAttribute('data-disabled')) return;
   const status = $('[data-status]', form);
   const submit = $('[data-submit]', form);
   const msg = form.dataset;

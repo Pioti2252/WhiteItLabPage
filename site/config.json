@@ -3,5 +3,6 @@
   "siteUrl": "https://whiteitlab.com",
   "github": "https://github.com/Pioti2252",
   "githubHandle": "Pioti2252",
+  "contactFormEnabled": false,
   "stack": ["Docker", "Kubernetes", "Terraform", "Ansible", "GitHub Actions", "GitLab CI", "Nginx", "Prometheus", "Grafana", "Linux", "PostgreSQL", "Node.js", "Python", "Go"]
 }

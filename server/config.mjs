@@ -17,6 +17,7 @@ export function loadConfig(env) {
     host: env.HOST || '0.0.0.0',
     port: int(env.PORT, 8080),
     trustProxy: bool(env.TRUST_PROXY, false),
+    contactEnabled: bool(env.CONTACT_ENABLED, true),
     allowedOrigins: (env.ALLOWED_ORIGINS || 'https://whiteitlab.com,https://www.whiteitlab.com')
       .split(',').map((s) => s.trim()).filter(Boolean),
     maxBodyBytes: int(env.MAX_BODY_BYTES, 16 * 1024),

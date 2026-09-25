@@ -239,7 +239,8 @@
       "errValidation": "Sprawdź zaznaczone pola.",
       "errRate": "Za dużo prób w krótkim czasie. Spróbuj ponownie za kilkanaście minut.",
       "errServer": "Coś poszło nie tak po mojej stronie. Spróbuj ponownie później albo napisz przez GitHuba.",
-      "honeypot": "Nie wypełniaj tego pola"
+      "honeypot": "Nie wypełniaj tego pola",
+      "disabled": "Formularz kontaktowy jest chwilowo wyłączony — wkrótce wróci. Do tego czasu zajrzyj na mój GitHub."
     }
   },
   "footer": {
