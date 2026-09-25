@@ -57,7 +57,7 @@ for (const lang of ['pl', 'en']) {
   </style>
   <div class="top"><span class="mark"></span><span>white<b>it</b>lab</span></div>
   <h1>${t.hero.title_html}</h1>
-  <div class="foot"><span>${tags}</span><span>whiteitlab.pl</span></div>`;
+  <div class="foot"><span>${tags}</span><span>whiteitlab.com</span></div>`;
   const file = join(tmp, `og-${lang}.html`);
   writeFileSync(file, html);
   run(['--window-size=1200,630', `--screenshot=${join(out, 'og', `og-${lang}.png`)}`, pathToFileURL(file).href]);

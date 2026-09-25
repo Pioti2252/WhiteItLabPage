@@ -89,10 +89,10 @@ test('JSON-LD is valid and describes business, site, page and FAQ', async () => 
 test('meta: one h1, canonical, hreflang, OG image, description length', async () => {
   const html = await page('/');
   assert.equal(html.match(/<h1[\s>]/g).length, 1);
-  assert.match(html, /<link rel="canonical" href="https:\/\/whiteitlab\.pl\/">/);
-  assert.match(html, /hreflang="en" href="https:\/\/whiteitlab\.pl\/en\/"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/whiteitlab\.com\/">/);
+  assert.match(html, /hreflang="en" href="https:\/\/whiteitlab\.com\/en\/"/);
   assert.match(html, /hreflang="x-default"/);
-  assert.match(html, /property="og:image" content="https:\/\/whiteitlab\.pl\/og\/og-pl\.png"/);
+  assert.match(html, /property="og:image" content="https:\/\/whiteitlab\.com\/og\/og-com\.png"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   const desc = html.match(/<meta name="description" content="([^"]+)"/)[1];
   assert.ok(desc.length >= 70 && desc.length <= 160, `description length ${desc.length}`);

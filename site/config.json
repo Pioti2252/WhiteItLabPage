@@ -1,6 +1,6 @@
 {
   "brand": "whiteitlab",
-  "siteUrl": "https://whiteitlab.pl",
+  "siteUrl": "https://whiteitlab.com",
   "github": "https://github.com/Pioti2252",
   "githubHandle": "Pioti2252",
   "stack": ["Docker", "Kubernetes", "Terraform", "Ansible", "GitHub Actions", "GitLab CI", "Nginx", "Prometheus", "Grafana", "Linux", "PostgreSQL", "Node.js", "Python", "Go"]

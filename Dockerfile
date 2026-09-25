@@ -32,7 +32,7 @@ RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund \
 # -------------------------------------------------------------- runtime ---
 FROM ${RUNTIME_IMAGE} AS runtime
 LABEL org.opencontainers.image.title="whiteitlab-web" \
-      org.opencontainers.image.description="whiteitlab.pl — site + contact form API" \
+      org.opencontainers.image.description="whiteitlab.com — site + contact form API" \
       org.opencontainers.image.source="https://github.com/Pioti2252"
 
 WORKDIR /app
