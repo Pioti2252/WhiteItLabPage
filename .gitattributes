@@ -1,0 +1,4 @@
+# Everything here runs on Linux (Docker, nginx) — keep LF line endings on every OS.
+* text=auto eol=lf
+*.png binary
+*.woff2 binary
