@@ -1,0 +1,6 @@
+# Keep the build context minimal — and never ship secrets into an image layer.
+**
+!package.json
+!package-lock.json
+!site/**
+!server/**

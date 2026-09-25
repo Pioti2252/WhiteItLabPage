@@ -1,0 +1,175 @@
+{
+  "lang": "en",
+  "locale": "en_US",
+  "path": "/en/",
+  "meta": {
+    "title": "whiteitlab — DevOps & software engineering",
+    "description": "whiteitlab: CI/CD, containers, infrastructure as code, monitoring and backend development. I design, automate and run the environments your product lives on."
+  },
+  "nav": {
+    "services": "Services",
+    "protocol": "Protocol",
+    "work": "Work",
+    "contact": "Contact",
+    "skip": "Skip to content",
+    "theme": "Toggle light/dark theme",
+    "langLabel": "Language"
+  },
+  "hero": {
+    "eyebrow": "DevOps · Backend · Automation",
+    "title_html": "Infrastructure that <em>won’t wake</em> you up at&nbsp;3&nbsp;a.m.",
+    "lead": "I design, automate and run the environments your product lives on — from the first Dockerfile to production monitoring. I also write the code that ties it all together.",
+    "ctaPrimary": "Describe your project",
+    "ctaSecondary": "Code on GitHub",
+    "spec": [
+      ["Model", "one-person lab"],
+      ["Location", "Poland · remote"],
+      ["Reply", "usually within 1 business day"],
+      ["Status", "taking on work"]
+    ],
+    "terminalTitle": "pipeline — production"
+  },
+  "services": {
+    "kicker": "01 / Services",
+    "title": "What I do",
+    "intro": "Five areas, one rule: everything I build can be recreated from a repository and understood without me.",
+    "items": [
+      {
+        "name": "CI/CD",
+        "title": "Pipelines you can trust",
+        "text": "Tests, builds and deployments in GitHub Actions or GitLab CI. Every merge reaches production predictably, and a rollback is one command, not a midnight rescue mission.",
+        "tags": ["GitHub Actions", "GitLab CI", "Argo CD"]
+      },
+      {
+        "name": "Containers",
+        "title": "Docker and Kubernetes, no magic",
+        "text": "Minimal multi-stage images, running as non-root, scanned for vulnerabilities. Compose where it's enough, Kubernetes where it makes sense.",
+        "tags": ["Docker", "Compose", "Kubernetes", "Helm"]
+      },
+      {
+        "name": "Infrastructure",
+        "title": "Servers as code",
+        "text": "VPS, AWS or Hetzner — described in Terraform and Ansible. You rebuild the environment from a repository in minutes, not from one person's memory.",
+        "tags": ["Terraform", "Ansible", "Linux", "Nginx"]
+      },
+      {
+        "name": "Monitoring",
+        "title": "See the problem before your customer does",
+        "text": "Metrics, logs and alerts that actually mean something. Plus server hardening, TLS and backups — with regularly tested restores.",
+        "tags": ["Prometheus", "Grafana", "Loki", "Trivy"]
+      },
+      {
+        "name": "Development",
+        "title": "Code that holds it together",
+        "text": "APIs and backend services, integrations between systems, scripts and internal tools that take repetitive manual work off your team.",
+        "tags": ["Node.js", "Python", "Go", "PostgreSQL"]
+      }
+    ]
+  },
+  "protocol": {
+    "kicker": "02 / Protocol",
+    "title": "How I work",
+    "steps": [
+      ["Discovery", "A conversation and a review of where things stand. You get a list of risks and priorities — even if we stop there."],
+      ["Plan", "Concrete scope, milestones and a quote. You know what you pay for and when you get it."],
+      ["Delivery", "Small, reversible steps. Everything in the repository, every change visible in history."],
+      ["Handover", "Documentation, runbooks and a short training. The infrastructure stays yours, not mine."]
+    ],
+    "principlesTitle": "Lab rules",
+    "principles": [
+      "Everything as code",
+      "Least privilege, always",
+      "Docs are part of the delivery",
+      "No vendor lock-in",
+      "Boring tech wherever possible"
+    ]
+  },
+  "work": {
+    "kicker": "03 / Work",
+    "title": "Selected work",
+    "caseLabel": "Case study",
+    "projects": [
+      {
+        "id": "WL-01",
+        "client": "Online store · home furnishing",
+        "title": "From manual deploys to a pipeline in six weeks",
+        "summary": "The app ran on a single server and was deployed by hand over FTP — usually on a Friday evening. No tested backups, no monitoring; every update was a gamble.",
+        "sections": [
+          ["Problem", "One person knew the server. A deploy took about 40 minutes and ended with manually checking whether it “works”. Customers were the ones reporting outages."],
+          ["Solution", "Containerised the app (multi-stage, non-root images) and built a GitHub Actions pipeline: tests → build → Trivy scan → GHCR registry → deploy with health check and automatic rollback. Staging and production described in Terraform and Ansible. Prometheus, Grafana and chat alerts. Nightly database backups with a weekly restore test."],
+          ["Outcome", "Deployments became a routine daytime task, and the team got documentation and runbooks to run the environment on their own."]
+        ],
+        "metrics": [
+          ["40 → 6 min", "deploy time"],
+          ["1 → 15+", "deploys per week"],
+          ["< 2 min", "rollback"]
+        ],
+        "stack": ["Docker", "GitHub Actions", "Trivy", "Terraform", "Ansible", "Prometheus", "Grafana"],
+        "pipeline": ["push", "test", "build", "scan", "deploy", "verify"]
+      }
+    ],
+    "slot": {
+      "id": "WL-02",
+      "label": "Reserved slot",
+      "title": "The next project lands here",
+      "text": "Work in progress. The write-up will appear once it's finished and the client agrees."
+    }
+  },
+  "stack": {
+    "label": "Tools I use every day"
+  },
+  "contact": {
+    "kicker": "04 / Contact",
+    "title": "Tell me what needs building.",
+    "intro": "A few sentences are enough. I'll reply with questions or a proposal for a short call.",
+    "githubTitle": "Rather see the code first?",
+    "githubText": "Repositories, tools and experiments from the lab.",
+    "form": {
+      "name": "Full name",
+      "email": "Email",
+      "company": "Company",
+      "optional": "optional",
+      "topic": "What is it about",
+      "topics": {
+        "cicd": "CI/CD",
+        "containers": "Containers / Kubernetes",
+        "infra": "Infrastructure / cloud",
+        "monitoring": "Monitoring / security",
+        "dev": "Development",
+        "other": "Something else"
+      },
+      "budget": "Budget",
+      "budgets": {
+        "unknown": "Not sure yet",
+        "s": "up to €1,200",
+        "m": "€1,200 – €3,500",
+        "l": "€3,500 – €9,000",
+        "xl": "over €9,000"
+      },
+      "message": "Message",
+      "messagePlaceholder": "What works today, what should work tomorrow, and what hurts the most?",
+      "consent": "I agree to my data being processed to respond to this inquiry.",
+      "privacy": "The data controller is whiteitlab. Your data is used only to reply to your inquiry and is not shared with anyone. You can request access, correction or deletion at any time.",
+      "submit": "Send inquiry",
+      "sending": "Sending…",
+      "ok": "Thanks! Your message arrived — I'll get back to you soon.",
+      "errValidation": "Please check the highlighted fields.",
+      "errRate": "Too many attempts in a short time. Please try again in a few minutes.",
+      "errServer": "Something went wrong on my side. Please try again later or reach me via GitHub.",
+      "honeypot": "Leave this field empty"
+    }
+  },
+  "footer": {
+    "note": "This site runs in a non-root container with a read-only filesystem, behind an nginx reverse proxy.",
+    "top": "Back to top"
+  },
+  "status": {
+    "sentTitle": "Message sent",
+    "sentText": "Thanks! I'll get back to you soon.",
+    "errorTitle": "Could not send",
+    "errorText": "Please check the form and try again.",
+    "notFoundTitle": "404 — page not found",
+    "notFoundText": "This path doesn't lead to any experiment.",
+    "back": "Back to the homepage"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "whiteitlab-web",
+  "version": "1.0.0",
+  "description": "whiteitlab.pl — strona firmowa (DevOps & programowanie)",
+  "scripts": {
+    "build": "node site/build.mjs",
+    "start": "node server/server.mjs",
+    "dev": "node scripts/dev.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "author": "whiteitlab",
+  "license": "UNLICENSED",
+  "type": "module",
+  "dependencies": {
+    "nodemailer": "^7.0.13"
+  },
+  "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
+}

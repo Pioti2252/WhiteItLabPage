@@ -1,0 +1,175 @@
+{
+  "lang": "pl",
+  "locale": "pl_PL",
+  "path": "/",
+  "meta": {
+    "title": "whiteitlab — DevOps i programowanie",
+    "description": "whiteitlab: CI/CD, kontenery, infrastruktura jako kod, monitoring i backend. Projektuję, automatyzuję i utrzymuję środowiska, na których działa Twój produkt."
+  },
+  "nav": {
+    "services": "Usługi",
+    "protocol": "Protokół",
+    "work": "Projekty",
+    "contact": "Kontakt",
+    "skip": "Przejdź do treści",
+    "theme": "Przełącz motyw jasny/ciemny",
+    "langLabel": "Język"
+  },
+  "hero": {
+    "eyebrow": "DevOps · Backend · Automatyzacja",
+    "title_html": "Infrastruktura, która <em>nie budzi</em> cię o&nbsp;3&nbsp;w&nbsp;nocy.",
+    "lead": "Projektuję, automatyzuję i utrzymuję środowiska, na których działa Twój produkt — od pierwszego Dockerfile’a po monitoring na produkcji. Piszę też kod, który to wszystko spina.",
+    "ctaPrimary": "Opisz swój projekt",
+    "ctaSecondary": "Kod na GitHubie",
+    "spec": [
+      ["Model", "jednoosobowe laboratorium"],
+      ["Lokalizacja", "Polska · zdalnie"],
+      ["Odpowiedź", "zwykle w 1 dzień roboczy"],
+      ["Status", "przyjmuję zlecenia"]
+    ],
+    "terminalTitle": "pipeline — produkcja"
+  },
+  "services": {
+    "kicker": "01 / Usługi",
+    "title": "Czym się zajmuję",
+    "intro": "Pięć obszarów, jedna zasada: wszystko, co zbuduję, da się odtworzyć z repozytorium i zrozumieć bez mnie.",
+    "items": [
+      {
+        "name": "CI/CD",
+        "title": "Pipeline’y, którym ufasz",
+        "text": "Testy, budowanie i wdrożenia w GitHub Actions lub GitLab CI. Każdy merge trafia na produkcję przewidywalnie, a rollback to jedna komenda, nie nocna akcja ratunkowa.",
+        "tags": ["GitHub Actions", "GitLab CI", "Argo CD"]
+      },
+      {
+        "name": "Kontenery",
+        "title": "Docker i Kubernetes bez magii",
+        "text": "Minimalne obrazy multi-stage, uruchamiane bez roota, skanowane pod kątem podatności. Compose tam, gdzie wystarczy, Kubernetes tam, gdzie ma sens.",
+        "tags": ["Docker", "Compose", "Kubernetes", "Helm"]
+      },
+      {
+        "name": "Infrastruktura",
+        "title": "Serwery jako kod",
+        "text": "VPS, AWS czy Hetzner — opisane w Terraformie i Ansible. Środowisko odtwarzasz z repozytorium w kilka minut, a nie z pamięci jednej osoby.",
+        "tags": ["Terraform", "Ansible", "Linux", "Nginx"]
+      },
+      {
+        "name": "Monitoring",
+        "title": "Widzisz problem, zanim zobaczy go klient",
+        "text": "Metryki, logi i alerty, które mają sens. Do tego hardening serwerów, TLS i backupy — z regularnie testowanym odtwarzaniem.",
+        "tags": ["Prometheus", "Grafana", "Loki", "Trivy"]
+      },
+      {
+        "name": "Programowanie",
+        "title": "Kod, który spina całość",
+        "text": "API i usługi backendowe, integracje między systemami, skrypty i narzędzia wewnętrzne, które zdejmują z zespołu ręczną, powtarzalną robotę.",
+        "tags": ["Node.js", "Python", "Go", "PostgreSQL"]
+      }
+    ]
+  },
+  "protocol": {
+    "kicker": "02 / Protokół",
+    "title": "Jak pracuję",
+    "steps": [
+      ["Rozpoznanie", "Rozmowa i przegląd obecnego stanu. Dostajesz listę ryzyk i priorytetów — nawet jeśli na tym skończymy."],
+      ["Plan", "Konkretny zakres, etapy i wycena. Wiesz, za co płacisz i kiedy to dostaniesz."],
+      ["Wdrożenie", "Małe, odwracalne kroki. Wszystko w repozytorium, każda zmiana przejrzysta w historii."],
+      ["Przekazanie", "Dokumentacja, runbooki i krótkie szkolenie. Infrastruktura zostaje Twoja, nie moja."]
+    ],
+    "principlesTitle": "Zasady laboratorium",
+    "principles": [
+      "Wszystko jako kod",
+      "Najmniejsze możliwe uprawnienia",
+      "Dokumentacja jest częścią dostawy",
+      "Zero vendor lock-in",
+      "Nudne technologie tam, gdzie się da"
+    ]
+  },
+  "work": {
+    "kicker": "03 / Projekty",
+    "title": "Wybrane realizacje",
+    "caseLabel": "Case study",
+    "projects": [
+      {
+        "id": "WL-01",
+        "client": "Sklep internetowy · branża wyposażenia wnętrz",
+        "title": "Z ręcznych wdrożeń do pipeline’u w sześć tygodni",
+        "summary": "Aplikacja działała na jednym serwerze, wdrażana ręcznie przez FTP — najczęściej w piątek wieczorem. Brak testowanych backupów, brak monitoringu, każda aktualizacja była ryzykiem.",
+        "sections": [
+          ["Problem", "Jedna osoba znała serwer. Wdrożenie trwało ok. 40 minut i kończyło się ręcznym sprawdzaniem, czy „działa”. Awarie wychodziły od klientów."],
+          ["Rozwiązanie", "Konteneryzacja aplikacji (obrazy multi-stage, bez roota), pipeline w GitHub Actions: testy → build → skan Trivy → rejestr GHCR → wdrożenie z health-checkiem i automatycznym rollbackiem. Staging i produkcja opisane w Terraformie i Ansible. Prometheus, Grafana i alerty na komunikator. Nocne backupy bazy z cotygodniowym testem odtworzenia."],
+          ["Efekt", "Wdrożenia stały się rutyną wykonywaną w ciągu dnia, a zespół dostał dokumentację i runbooki pozwalające utrzymać środowisko samodzielnie."]
+        ],
+        "metrics": [
+          ["40 → 6 min", "czas wdrożenia"],
+          ["1 → 15+", "wdrożeń tygodniowo"],
+          ["< 2 min", "rollback"]
+        ],
+        "stack": ["Docker", "GitHub Actions", "Trivy", "Terraform", "Ansible", "Prometheus", "Grafana"],
+        "pipeline": ["push", "test", "build", "scan", "deploy", "verify"]
+      }
+    ],
+    "slot": {
+      "id": "WL-02",
+      "label": "Slot zarezerwowany",
+      "title": "Tu pojawi się kolejny projekt",
+      "text": "Realizacja w toku. Opis trafi tutaj po zakończeniu prac i za zgodą klienta."
+    }
+  },
+  "stack": {
+    "label": "Narzędzia, z którymi pracuję na co dzień"
+  },
+  "contact": {
+    "kicker": "04 / Kontakt",
+    "title": "Opowiedz, co trzeba zbudować.",
+    "intro": "Kilka zdań wystarczy. Odpiszę z pytaniami albo propozycją krótkiej rozmowy.",
+    "githubTitle": "Wolisz najpierw zobaczyć kod?",
+    "githubText": "Repozytoria, narzędzia i eksperymenty z laboratorium.",
+    "form": {
+      "name": "Imię i nazwisko",
+      "email": "E-mail",
+      "company": "Firma",
+      "optional": "opcjonalnie",
+      "topic": "Czego dotyczy zapytanie",
+      "topics": {
+        "cicd": "CI/CD",
+        "containers": "Kontenery / Kubernetes",
+        "infra": "Infrastruktura / chmura",
+        "monitoring": "Monitoring / bezpieczeństwo",
+        "dev": "Programowanie",
+        "other": "Coś innego"
+      },
+      "budget": "Budżet",
+      "budgets": {
+        "unknown": "Nie wiem jeszcze",
+        "s": "do 5 000 zł",
+        "m": "5 000 – 15 000 zł",
+        "l": "15 000 – 40 000 zł",
+        "xl": "powyżej 40 000 zł"
+      },
+      "message": "Wiadomość",
+      "messagePlaceholder": "Co działa dziś, co ma działać jutro i co przeszkadza najbardziej?",
+      "consent": "Zgadzam się na przetwarzanie podanych danych w celu odpowiedzi na zapytanie.",
+      "privacy": "Administratorem danych jest whiteitlab. Dane służą wyłącznie do odpowiedzi na zapytanie i nie są przekazywane dalej. Masz prawo do wglądu, poprawienia i usunięcia swoich danych.",
+      "submit": "Wyślij zapytanie",
+      "sending": "Wysyłanie…",
+      "ok": "Dzięki! Wiadomość dotarła — odezwę się wkrótce.",
+      "errValidation": "Sprawdź zaznaczone pola.",
+      "errRate": "Za dużo prób w krótkim czasie. Spróbuj ponownie za kilkanaście minut.",
+      "errServer": "Coś poszło nie tak po mojej stronie. Spróbuj ponownie później albo napisz przez GitHuba.",
+      "honeypot": "Nie wypełniaj tego pola"
+    }
+  },
+  "footer": {
+    "note": "Ta strona działa w kontenerze bez roota, z systemem plików tylko do odczytu, za reverse proxy nginx.",
+    "top": "Na górę"
+  },
+  "status": {
+    "sentTitle": "Wiadomość wysłana",
+    "sentText": "Dzięki! Odezwę się wkrótce.",
+    "errorTitle": "Nie udało się wysłać",
+    "errorText": "Sprawdź dane w formularzu i spróbuj ponownie.",
+    "notFoundTitle": "404 — nie ma takiej strony",
+    "notFoundText": "Ta ścieżka nie prowadzi do żadnego eksperymentu.",
+    "back": "Wróć na stronę główną"
+  }
+}

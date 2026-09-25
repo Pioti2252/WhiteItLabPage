@@ -1,0 +1,45 @@
+# whiteitlab — production compose for a single VPS behind host nginx.
+#   docker compose up -d --build
+# The container is reachable ONLY from the host (127.0.0.1:8080); nginx on the
+# host terminates TLS and proxies to it. See docs/DEPLOYMENT.md.
+
+services:
+  web:
+    build:
+      context: .
+    image: whiteitlab/web:latest
+    container_name: whiteitlab-web
+    restart: unless-stopped
+
+    env_file: .env
+    environment:
+      SMTP_PASS_FILE: /run/secrets/smtp_pass
+    secrets:
+      - smtp_pass
+
+    # Bind to loopback only — never expose the app port to the internet.
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    # --- hardening --------------------------------------------------------
+    user: "65532:65532"
+    read_only: true                 # root filesystem is immutable
+    tmpfs:
+      - /tmp:size=8m,mode=1777,noexec,nosuid,nodev
+    cap_drop: [ALL]                 # needs no Linux capabilities (port > 1024)
+    security_opt:
+      - no-new-privileges:true
+    init: true                      # proper PID 1 (signal forwarding, zombie reaping)
+    mem_limit: 256m
+    cpus: 0.50
+    pids_limit: 64
+    ulimits:
+      nofile: { soft: 4096, hard: 4096 }
+
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+secrets:
+  smtp_pass:
+    file: ./secrets/smtp_pass       # chmod 400, chown 65532 — see docs/DEPLOYMENT.md
