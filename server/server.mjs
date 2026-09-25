@@ -5,6 +5,7 @@
 // No framework on purpose: the attack surface is this file plus nodemailer.
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
+import { brotliCompressSync, gzipSync, constants as zlib } from 'node:zlib';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +28,15 @@ const TYPES = {
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
   '.xml': 'application/xml; charset=utf-8',
+  '.png': 'image/png',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
 };
+const COMPRESSIBLE = /^(text\/|application\/(xml|manifest\+json)|image\/svg)/;
+
+const cacheFor = (p) =>
+  /\.[0-9a-f]{10}\.(css|js|woff2)$/.test(p) ? 'public, max-age=31536000, immutable' // hashed name = never changes
+    : /\.png$/.test(p) ? 'public, max-age=604800'                                    // icons, OG images: 7 days
+      : 'public, max-age=300, must-revalidate';                                      // HTML & co: 5 min
 
 // Load every file once. Requests can only ever hit keys of this map, so path
 // traversal ("/../../etc/passwd") is impossible by construction.
@@ -40,16 +49,17 @@ const files = new Map();
     if (!type) continue;
     const body = readFileSync(full);
     const urlPath = '/' + relative(DIST, full).split(sep).join('/');
-    files.set(urlPath, {
-      body,
-      type,
-      etag: '"' + createHash('sha1').update(body).digest('base64url').slice(0, 16) + '"',
-      cache: /^\/assets\/.+\.[0-9a-f]{10}\.(css|js)$/.test(urlPath)
-        ? 'public, max-age=31536000, immutable'
-        : urlPath.startsWith('/assets/fonts/')
-          ? 'public, max-age=2592000'
-          : 'public, max-age=300, must-revalidate',
-    });
+    const tag = createHash('sha1').update(body).digest('base64url').slice(0, 16);
+    // Pre-compress once at startup (max quality costs nothing at runtime). Keep
+    // a variant only if it's smaller. Each encoding gets its own ETag.
+    const variants = { identity: { body, etag: `"${tag}"` } };
+    if (COMPRESSIBLE.test(type) && body.length > 512) {
+      const br = brotliCompressSync(body, { params: { [zlib.BROTLI_PARAM_QUALITY]: 11, [zlib.BROTLI_PARAM_SIZE_HINT]: body.length } });
+      const gz = gzipSync(body, { level: 9 });
+      if (br.length < body.length) variants.br = { body: br, etag: `"${tag}-br"` };
+      if (gz.length < body.length) variants.gzip = { body: gz, etag: `"${tag}-gz"` };
+    }
+    files.set(urlPath, { type, variants, cache: cacheFor(urlPath) });
   }
 })(DIST);
 log('info', 'static files loaded', { count: files.size });
@@ -96,18 +106,40 @@ function serveStatic(req, res, pathname) {
   const key = resolveStatic(pathname);
   if (!key) {
     const notFound = files.get(pathname.startsWith('/en/') ? '/en/404.html' : '/404.html');
-    return send(res, 404, req.method === 'HEAD' ? '' : notFound.body, { 'Content-Type': notFound.type, 'Cache-Control': 'no-store' });
+    const [enc, v] = pickEncoding(req, notFound);
+    return send(res, 404, req.method === 'HEAD' ? '' : v.body, {
+      'Content-Type': notFound.type, 'Cache-Control': 'no-store', Vary: 'Accept-Encoding',
+      ...(enc !== 'identity' && { 'Content-Encoding': enc }),
+    });
   }
   const f = files.get(key);
-  if (req.headers['if-none-match'] === f.etag) {
-    return send(res, 304, '', { ETag: f.etag, 'Cache-Control': f.cache });
-  }
-  send(res, 200, req.method === 'HEAD' ? '' : f.body, {
-    'Content-Type': f.type,
-    'Content-Length': f.body.length,
+  const [enc, v] = pickEncoding(req, f);
+  const headers = {
     'Cache-Control': f.cache,
-    ETag: f.etag,
+    ETag: v.etag,
+    ...(Object.keys(f.variants).length > 1 && { Vary: 'Accept-Encoding' }),
+  };
+  if (req.headers['if-none-match'] === v.etag) return send(res, 304, '', headers);
+  send(res, 200, req.method === 'HEAD' ? '' : v.body, {
+    ...headers,
+    'Content-Type': f.type,
+    'Content-Length': v.body.length,
+    ...(enc !== 'identity' && { 'Content-Encoding': enc }),
   });
+}
+
+// Brotli > gzip > none, based on the client's Accept-Encoding (q=0 means "no").
+function pickEncoding(req, f) {
+  const q = {};
+  for (const part of String(req.headers['accept-encoding'] || '').toLowerCase().split(',')) {
+    const [name, ...params] = part.split(';').map((s) => s.trim());
+    const qp = params.find((p) => p.startsWith('q='));
+    if (name) q[name] = qp ? Number(qp.slice(2)) || 0 : 1;
+  }
+  for (const enc of ['br', 'gzip']) {
+    if (f.variants[enc] && (q[enc] ?? q['*'] ?? 0) > 0) return [enc, f.variants[enc]];
+  }
+  return ['identity', f.variants.identity];
 }
 
 /* ----------------------------------------------------------- contact --- */

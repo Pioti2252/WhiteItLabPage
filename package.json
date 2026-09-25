@@ -6,7 +6,8 @@
     "build": "node site/build.mjs",
     "start": "node server/server.mjs",
     "dev": "node scripts/dev.mjs",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node --test \"test/*.test.mjs\"",
+    "images": "node scripts/images.mjs"
   },
   "author": "whiteitlab",
   "license": "MIT",

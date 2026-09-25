@@ -25,6 +25,12 @@ Status: `Przyjęta` · `Zastąpiona` · `Do potwierdzenia` (wymaga decyzji wła�
 | [016](#adr-016) | Domena `whiteitlab.pl` | Do potwierdzenia |
 | [017](#adr-017) | Projekt WL-01 to przykład do podmiany, WL-02 to pusty slot | Do potwierdzenia |
 | [018](#adr-018) | Logi bez danych osobowych | Przyjęta |
+| [019](#adr-019) | Dane strukturalne JSON-LD w jednym `@graph` | Przyjęta |
+| [020](#adr-020) | Sekcja FAQ jako treść pod długie frazy | Przyjęta |
+| [021](#adr-021) | Obrazki OG i ikony generowane skryptem i commitowane | Przyjęta |
+| [022](#adr-022) | Kompresja brotli/gzip w aplikacji, bez inline CSS | Przyjęta |
+| [023](#adr-023) | Hashowane nazwy fontów, hero bez czekania na fonty | Przyjęta |
+| [024](#adr-024) | Bez danych osobowych właściciela i bez analityki (na razie) | Do potwierdzenia |
 
 ---
 
@@ -179,3 +185,45 @@ Właściciel poprosił o wymyślenie realistycznego przykładu. Case study „Z 
 
 **Decyzja.** Logi JSON na stdout (zbiera je Docker, rotacja 3×10 MB). Z formularza logowane są tylko metadane (temat, język, długość wiadomości) — nigdy imię, e-mail, treść ani IP.
 **Uzasadnienie.** Minimalizacja danych (RODO art. 5); treść zgłoszenia i tak jest w skrzynce pocztowej. IP pozostaje w access logu nginx, który administrator kontroluje osobno.
+
+## ADR-019
+**Dane strukturalne JSON-LD w jednym `@graph`** · *Przyjęta (2026-09-25)*
+
+**Decyzja.** Każda strona główna (PL, EN) ma jeden blok `application/ld+json` z węzłami `ProfessionalService` (z katalogiem usług), `WebSite`, `WebPage` i `FAQPage`, powiązanymi przez `@id`. Generowany z tych samych plików JSON co treść, więc markup nie rozjedzie się z tym, co widać na stronie.
+**Odrzucone.** *Mikrodane w HTML*: zaśmiecają szablon i trudniej je utrzymać. *`LocalBusiness` z adresem*: brak adresu do podania. *`AggregateRating`*: brak prawdziwych opinii — zmyślone to naruszenie wytycznych Google.
+**Konsekwencje.** Blok JSON-LD nie wykonuje się jako skrypt, więc CSP (`script-src 'self'`) go nie blokuje. Znak `<` jest escapowany (`<`), żeby treść nie mogła zamknąć znacznika `<script>`.
+
+## ADR-020
+**Sekcja FAQ jako treść pod długie frazy** · *Przyjęta*
+
+**Kontekst.** Strona miała mało tekstu odpowiadającego na konkretne pytania klientów („ile kosztuje…”, „czy zdalnie…”).
+**Decyzja.** 6 pytań i odpowiedzi w obu językach, sekcja `#faq` przed kontaktem, link w menu, znacznik `FAQPage`. Na razie **bez cen** — odpowiedź o koszcie opisuje proces wyceny.
+**Konsekwencje.** Numeracja sekcji: FAQ = 04, Kontakt = 05. Odpowiedzi to propozycja — zweryfikuj, czy zgadzają się z Twoją praktyką (np. praca z zagranicą).
+
+## ADR-021
+**Obrazki OG i ikony generowane skryptem i commitowane** · *Przyjęta*
+
+**Decyzja.** `npm run images` renderuje w headless Chrome obrazki 1200×630 (PL/EN) z nagłówkiem hero i ikony PNG (canvas → `--dump-dom`). Wynik trafia do `site/static/` i jest commitowany.
+**Odrzucone.** *Generowanie przy każdym buildzie*: build Dockera musiałby mieć Chrome'a (+300 MB, większa powierzchnia ataku). *puppeteer/sharp*: dodatkowe zależności dla operacji wykonywanej raz na kilka miesięcy.
+**Konsekwencje.** Po zmianie nagłówka hero, kolorów lub domeny trzeba ręcznie uruchomić `npm run images`.
+
+## ADR-022
+**Kompresja brotli/gzip w aplikacji, bez inline CSS** · *Przyjęta*
+
+**Kontekst.** Lighthouse zgłaszał brak kompresji (lokalnie nie ma nginx) i render-blocking CSS.
+**Decyzja.** Serwer przy starcie kompresuje pliki tekstowe (brotli q11 + gzip 9), wybiera wariant na podstawie `Accept-Encoding`, osobne ETagi dla każdego kodowania, `Vary: Accept-Encoding`. nginx widzi już skompresowaną odpowiedź i nie kompresuje jej drugi raz; jego `gzip` zostaje jako zabezpieczenie. Krytyczny CSS **nie** jest wstawiany inline.
+**Uzasadnienie.** Brotli daje ~15–20% mniej niż gzip, a kompresja z maksymalną jakością nic nie kosztuje, bo robi się raz. Inline CSS wymagałby `style-src 'unsafe-inline'` albo utrzymywania hashy w CSP — przy 6 KB CSS po kompresji zysk (~kilkaset ms tylko w symulacji wolnego 4G) nie jest tego wart.
+**Konsekwencje.** Uzupełnia ADR-003 i ADR-008 (tam kompresja była tylko w nginx).
+
+## ADR-023
+**Hashowane nazwy fontów, hero bez czekania na fonty** · *Przyjęta*
+
+**Decyzja.** Build nadaje fontom nazwy z hashem (jak CSS/JS) i przepisuje odwołania w CSS → cache `immutable` na rok (wcześniej 30 dni). Animacja nagłówka startuje od razu po załadowaniu skryptu, a nie po `document.fonts.ready`. Lead i przyciski w hero pojawiają się razem z nagłówkiem, bez IntersectionObservera.
+**Wynik.** LCP (mobile, symulacja): PL 2.7 → 2.3 s, EN 2.1 → 1.8 s. Pomiar w [SEO.md](SEO.md).
+
+## ADR-024
+**Bez danych osobowych właściciela i bez analityki (na razie)** · *Do potwierdzenia*
+
+**Kontekst.** Imię i nazwisko właściciela (np. `Person` w JSON-LD, sekcja „o mnie”) wzmocniłoby sygnały E-E-A-T. Analityka pozwoliłaby mierzyć ruch.
+**Decyzja.** Na razie żadne z nich: publikacja danych osobowych to decyzja właściciela, a analityka wymaga zmiany CSP i przemyślenia RODO. Na start wystarcza Google Search Console (bez kodu na stronie).
+**Jeśli tak.** Dane osobowe: sekcja „o mnie” + węzeł `Person` (`founder` w `ProfessionalService`, `sameAs`: LinkedIn/GitHub). Analityka: samodzielnie hostowane Umami lub Plausible bez ciasteczek, wpis w `connect-src`/`script-src`, nowy ADR.

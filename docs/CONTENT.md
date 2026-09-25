@@ -14,13 +14,15 @@ Po edycji: `npm run dev` → sprawdź http://localhost:8080 i http://localhost:8
 
 | Klucz | Gdzie na stronie |
 |---|---|
-| `meta.title`, `meta.description` | tytuł karty i opis w Google |
+| `meta.title`, `meta.description` | tytuł karty i opis w Google (tytuł ≤ 60, opis 70–160 znaków — pilnują tego testy) |
+| `meta.slogan`, `meta.ogImageAlt` | slogan w danych strukturalnych, opis obrazka udostępnień |
 | `hero.*` | pierwszy ekran: nagłówek, lead, przyciski, tabela „Model / Lokalizacja / Odpowiedź / Status” |
 | `services.items[]` | lista usług (rozwijane wiersze). Każda: `name` (etykieta), `title`, `text`, `tags[]` |
 | `protocol.steps[]` | 4 kroki „Jak pracuję” — `[nagłówek, opis]` |
 | `protocol.principles[]` | „Zasady laboratorium” |
 | `work.projects[]` | case study (patrz niżej) |
 | `work.slot` | wolne miejsce na kolejny projekt |
+| `faq.items[]` | pytania i odpowiedzi — `[pytanie, odpowiedź]`; trafiają też do JSON-LD (`FAQPage`) |
 | `contact.*` | sekcja kontaktu i wszystkie etykiety/komunikaty formularza |
 | `footer.*`, `status.*` | stopka i strony „wysłano / błąd / 404” |
 
@@ -67,7 +69,7 @@ Założono `whiteitlab.pl` (ADR-016). Aby zmienić, podmień we wszystkich miejs
 grep -rl "whiteitlab.pl" --exclude-dir=node_modules --exclude-dir=dist .
 ```
 
-Kluczowe pliki: `site/config.json` (`siteUrl`), `.env` (`ALLOWED_ORIGINS`), `server/config.mjs` (wartość domyślna), `deploy/nginx/*.conf`.
+Kluczowe pliki: `site/config.json` (`siteUrl`), `.env` (`ALLOWED_ORIGINS`), `server/config.mjs` (wartość domyślna), `deploy/nginx/*.conf`, `scripts/images.mjs` (napis na obrazku OG), testy w `test/server.test.mjs`. Na koniec `npm run images`.
 
 ## Dodanie kolejnego języka
 

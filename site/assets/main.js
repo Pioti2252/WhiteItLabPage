@@ -62,10 +62,12 @@
       }
     };
     walk(split);
-    // No rAF here: it is paused in background tabs, and the headline must never stay hidden.
-    const go = () => { void hero.offsetWidth; hero.classList.add('hero-ready'); };
-    (document.fonts?.ready ?? Promise.resolve()).then(go);
-    setTimeout(go, 800); // never wait forever on fonts
+    // Start right away: waiting for fonts delayed LCP by ~1 s (font-display: swap
+    // handles the font change). No rAF: it's paused in background tabs, and the
+    // headline must never stay hidden. The reflow commits the hidden state first
+    // so the transition actually runs.
+    void hero.offsetWidth;
+    hero.classList.add('hero-ready');
   }
   if (hero && finePointer && !reduced) {
     hero.addEventListener('pointermove', (e) => {

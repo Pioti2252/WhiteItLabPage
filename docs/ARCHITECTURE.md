@@ -31,10 +31,13 @@
 site/content/pl.json ─┐
 site/content/en.json ─┼─► site/build.mjs ──► dist/
 site/config.json ─────┤     (page.mjs)         ├─ index.html, en/index.html
-site/assets/* ────────┘                        ├─ thanks/, error/, 404.html (×2 języki)
+site/assets/* ────────┤                        ├─ thanks/, error/, 404.html (×2 języki)
+site/static/* ────────┘                        ├─ og/og-{pl,en}.png, icon-*.png, site.webmanifest
 node_modules/@fontsource-variable/* ─────────► ├─ assets/style.<hash>.css, main.<hash>.js, theme.<hash>.js
-                                               ├─ assets/fonts/*.woff2
+                                               ├─ assets/fonts/*.<hash>.woff2
                                                └─ favicon.svg, robots.txt, sitemap.xml
+
+scripts/images.mjs (ręcznie, headless Chrome) ──► site/static/og/*.png, site/static/icon-*.png
 ```
 
 W Dockerfile build odbywa się w osobnym etapie; do obrazu trafia tylko `dist/`, `server/` i produkcyjne `node_modules` (sam nodemailer).
@@ -62,10 +65,11 @@ przeglądarka                         nginx                     aplikacja
 
 - Przy starcie serwer wczytuje całe `dist/` do `Map<ścieżka, {body, etag, type, cache}>`.
 - Żądanie jest obsługiwane tylko wtedy, gdy ścieżka jest kluczem mapy (albo `ścieżka/index.html`). Wszystko inne → 404. Nie ma żadnego `path.join(root, userInput)`.
+- Pliki tekstowe są kompresowane przy starcie (brotli q11 + gzip 9); wariant wybierany wg `Accept-Encoding`, `Vary: Accept-Encoding`, osobny `ETag` na kodowanie (ADR-022).
 - `ETag` + `If-None-Match` → 304.
 - Cache:
-  - `assets/*.<hash>.{css,js}` → `max-age=31536000, immutable`
-  - fonty → 30 dni
+  - `assets/*.<hash>.{css,js,woff2}` → `max-age=31536000, immutable`
+  - PNG (ikony, OG) → 7 dni
   - HTML i reszta → 5 min + `must-revalidate`
 
 ## Konfiguracja (zmienne środowiskowe)

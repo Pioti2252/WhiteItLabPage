@@ -24,7 +24,7 @@ const logo = (t, cfg) => `
     ${icon.mark}<span class="logo-word">white<b>it</b>lab</span>
   </a>`;
 
-function layout({ t, alt, cfg, assets, path, title, description, body, noindex = false }) {
+function layout({ t, alt, cfg, assets, path, title, description, body, noindex = false, jsonld = '' }) {
   const url = cfg.siteUrl + path;
   const altPath = path.startsWith('/en/') ? path.replace(/^\/en\//, '/') : '/en' + path;
   return `<!doctype html>
@@ -34,21 +34,38 @@ function layout({ t, alt, cfg, assets, path, title, description, body, noindex =
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${url}">
+${noindex ? '<meta name="robots" content="noindex, follow">' : `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="${url}">
 <link rel="alternate" hreflang="${t.lang}" href="${url}">
 <link rel="alternate" hreflang="${alt.lang}" href="${cfg.siteUrl + altPath}">
 <link rel="alternate" hreflang="x-default" href="${cfg.siteUrl}/">`}
+<meta name="author" content="${esc(cfg.brand)}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${esc(cfg.brand)}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
 <meta property="og:locale" content="${t.locale}">
+<meta property="og:locale:alternate" content="${alt.locale}">
+<meta property="og:image" content="${cfg.siteUrl}/og/og-${t.lang}.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(t.meta.ogImageAlt)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(description)}">
+<meta name="twitter:image" content="${cfg.siteUrl}/og/og-${t.lang}.png">
+<meta name="twitter:image:alt" content="${esc(t.meta.ogImageAlt)}">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3f1ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f0f" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/assets/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/assets/fonts/${assets.fontPreload}" as="font" type="font/woff2" crossorigin>${jsonld ? `
+<script type="application/ld+json">${jsonld}</script>` : ''}
 <link rel="stylesheet" href="/assets/${assets.css}">
 <script src="/assets/${assets.theme}"></script>
 <script src="/assets/${assets.js}" defer></script>
@@ -62,6 +79,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" hr
       <a href="${t.path}#services">${esc(t.nav.services)}</a>
       <a href="${t.path}#protocol">${esc(t.nav.protocol)}</a>
       <a href="${t.path}#work">${esc(t.nav.work)}</a>
+      <a href="${t.path}#faq">FAQ</a>
       <a href="${t.path}#contact">${esc(t.nav.contact)}</a>
     </nav>
     <div class="header-tools">
@@ -109,6 +127,72 @@ const terminal = (t) => `
       <li class="final"><span class="acc">●</span> production @ v2.14.0 — 0 downtime</li>
     </ol>
   </figure>`;
+
+// schema.org structured data (JSON-LD). One @graph per page: the business,
+// the website, the page and the FAQ, linked by @id. Only facts that are true
+// and visible on the page — Google penalises markup that doesn't match content.
+function structuredData(t, cfg) {
+  const site = cfg.siteUrl;
+  const url = site + t.path;
+  const org = `${site}/#org`;
+  const graph = [
+    {
+      '@type': 'ProfessionalService',
+      '@id': org,
+      name: cfg.brand,
+      url: `${site}/`,
+      logo: { '@type': 'ImageObject', url: `${site}/icon-512.png`, width: 512, height: 512 },
+      image: `${site}/og/og-${t.lang}.png`,
+      description: t.meta.description,
+      slogan: t.meta.slogan,
+      sameAs: [cfg.github],
+      areaServed: { '@type': 'Country', name: t.lang === 'pl' ? 'Polska' : 'Poland' },
+      address: { '@type': 'PostalAddress', addressCountry: 'PL' },
+      knowsLanguage: ['pl', 'en'],
+      knowsAbout: cfg.stack,
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: t.services.title,
+        itemListElement: t.services.items.map((s) => ({
+          '@type': 'Offer',
+          itemOffered: { '@type': 'Service', name: `${s.name} — ${s.title}`, description: s.text, provider: { '@id': org } },
+        })),
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: `${site}/`,
+      name: cfg.brand,
+      inLanguage: ['pl-PL', 'en'],
+      publisher: { '@id': org },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${url}#webpage`,
+      url,
+      name: t.meta.title,
+      description: t.meta.description,
+      inLanguage: t.lang === 'pl' ? 'pl-PL' : 'en',
+      isPartOf: { '@id': `${site}/#website` },
+      about: { '@id': org },
+      primaryImageOfPage: { '@type': 'ImageObject', url: `${site}/og/og-${t.lang}.png`, width: 1200, height: 630 },
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${url}#faq`,
+      inLanguage: t.lang === 'pl' ? 'pl-PL' : 'en',
+      isPartOf: { '@id': `${url}#webpage` },
+      mainEntity: t.faq.items.map(([q, a]) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    },
+  ];
+  // "<" escaped so content can never close the <script> element.
+  return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replaceAll('<', '\\u003c');
+}
 
 function home({ t, alt, cfg, assets }) {
   const f = t.contact.form;
@@ -163,8 +247,8 @@ function home({ t, alt, cfg, assets }) {
     <div class="hero-copy">
       <p class="eyebrow mono"><span class="pulse" aria-hidden="true"></span>${esc(t.hero.eyebrow)}</p>
       <h1 class="hero-title" data-split>${t.hero.title_html}</h1>
-      <p class="lead" data-reveal>${esc(t.hero.lead)}</p>
-      <div class="cta-row" data-reveal>
+      <p class="lead hero-in">${esc(t.hero.lead)}</p>
+      <div class="cta-row hero-in">
         <a class="btn btn-solid" href="#contact" data-magnetic>${esc(t.hero.ctaPrimary)} ${icon.arrow}</a>
         <a class="btn btn-line" href="${cfg.github}" rel="me noopener" target="_blank">${icon.github} ${esc(t.hero.ctaSecondary)}</a>
       </div>
@@ -226,7 +310,23 @@ function home({ t, alt, cfg, assets }) {
   </div>
 </section>
 
-<section class="section" id="contact">
+<section class="section" id="faq">
+  <div class="wrap faq-grid">
+    <div class="section-head">
+      <p class="kicker mono" data-reveal>${esc(t.faq.kicker)}</p>
+      <h2 data-reveal>${esc(t.faq.title)}</h2>
+    </div>
+    <div class="faq-list">
+      ${t.faq.items.map(([q, a], i) => `
+      <details class="faq" data-reveal>
+        <summary><span class="mono faq-num">Q${i + 1}</span><h3>${esc(q)}</h3><span class="svc-toggle" aria-hidden="true"></span></summary>
+        <p>${esc(a)}</p>
+      </details>`).join('')}
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="contact">
   <div class="wrap contact-grid">
     <div class="contact-copy">
       <p class="kicker mono" data-reveal>${esc(t.contact.kicker)}</p>
@@ -295,7 +395,7 @@ function home({ t, alt, cfg, assets }) {
   </div>
 </section>`;
 
-  return layout({ t, alt, cfg, assets, path: t.path, title: t.meta.title, description: t.meta.description, body });
+  return layout({ t, alt, cfg, assets, path: t.path, title: t.meta.title, description: t.meta.description, body, jsonld: structuredData(t, cfg) });
 }
 
 function status({ t, alt, cfg, assets, kind }) {

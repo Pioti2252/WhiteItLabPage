@@ -66,3 +66,72 @@ test('contact: validation errors -> 422, then rate limit -> 429', async () => {
   await post({});
   assert.equal((await post({})).status, 429);
 });
+
+/* ------------------------------------------------------------------ SEO --- */
+const page = async (p) => (await fetch(base + p)).text();
+
+test('JSON-LD is valid and describes business, site, page and FAQ', async () => {
+  for (const [p, lang] of [['/', 'pl'], ['/en/', 'en']]) {
+    const html = await page(p);
+    const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    assert.ok(m, `no JSON-LD on ${p}`);
+    const data = JSON.parse(m[1]);
+    const types = data['@graph'].map((n) => n['@type']);
+    assert.deepEqual(types, ['ProfessionalService', 'WebSite', 'WebPage', 'FAQPage']);
+    const faq = data['@graph'][3];
+    assert.ok(faq.mainEntity.length >= 3);
+    // every FAQ question in the markup must also be visible on the page
+    for (const q of faq.mainEntity) assert.ok(html.includes(q.name), `FAQ not visible: ${q.name}`);
+    assert.equal(data['@graph'][2].inLanguage, lang === 'pl' ? 'pl-PL' : 'en');
+  }
+});
+
+test('meta: one h1, canonical, hreflang, OG image, description length', async () => {
+  const html = await page('/');
+  assert.equal(html.match(/<h1[\s>]/g).length, 1);
+  assert.match(html, /<link rel="canonical" href="https:\/\/whiteitlab\.pl\/">/);
+  assert.match(html, /hreflang="en" href="https:\/\/whiteitlab\.pl\/en\/"/);
+  assert.match(html, /hreflang="x-default"/);
+  assert.match(html, /property="og:image" content="https:\/\/whiteitlab\.pl\/og\/og-pl\.png"/);
+  assert.match(html, /name="twitter:card" content="summary_large_image"/);
+  const desc = html.match(/<meta name="description" content="([^"]+)"/)[1];
+  assert.ok(desc.length >= 70 && desc.length <= 160, `description length ${desc.length}`);
+  const title = html.match(/<title>([^<]+)<\/title>/)[1];
+  assert.ok(title.length <= 60, `title length ${title.length}`);
+});
+
+test('status pages are noindex and not in the sitemap', async () => {
+  assert.match(await page('/thanks/'), /<meta name="robots" content="noindex/);
+  const sitemap = await page('/sitemap.xml');
+  assert.match(sitemap, /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+  assert.ok(!sitemap.includes('/thanks/'));
+});
+
+test('OG images, icons and manifest are served', async () => {
+  for (const p of ['/og/og-pl.png', '/og/og-en.png', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png']) {
+    const r = await fetch(base + p);
+    assert.equal(r.status, 200, p);
+    assert.equal(r.headers.get('content-type'), 'image/png');
+  }
+  const m = await fetch(`${base}/site.webmanifest`);
+  assert.equal(m.status, 200);
+  assert.ok((await m.json()).icons.length >= 2);
+});
+
+test('compression: brotli preferred, gzip fallback, identity when refused', async () => {
+  const get = (ae) => new Promise((res) => {
+    import('node:http').then(({ get }) => get(`${base}/`, { headers: { 'accept-encoding': ae } }, (r) => { r.resume(); res(r.headers); }));
+  });
+  assert.equal((await get('gzip, deflate, br'))['content-encoding'], 'br');
+  assert.equal((await get('gzip'))['content-encoding'], 'gzip');
+  assert.equal((await get('br;q=0, gzip;q=0'))['content-encoding'], undefined);
+  assert.equal((await get('gzip, br')).vary, 'Accept-Encoding');
+});
+
+test('hashed fonts are cached immutably', async () => {
+  const html = await page('/');
+  const font = html.match(/href="(\/assets\/fonts\/[^"]+\.[0-9a-f]{10}\.woff2)"/)[1];
+  const r = await fetch(base + font);
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('cache-control'), /immutable/);
+});
